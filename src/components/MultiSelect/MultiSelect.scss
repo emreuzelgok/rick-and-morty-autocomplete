@@ -1,0 +1,54 @@
+.multi-select { 
+  width: 410px;
+  position: relative;
+  &__values {
+    border: 1px solid #94A3B8;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0px 4px 5px -4px rgba(0, 0, 0, 0.57);
+    display: flex;
+    flex-wrap: wrap;
+    padding: 4px 4px 4px 7px;
+    position: relative;
+    overflow-x: hidden;
+    padding-right: 40px;
+    min-height: 38px;
+  }
+  &__options-wrapper {
+    position: relative;
+  }
+  &__options {
+    min-height: 48px;
+    max-height: 456px;
+    border: 1px solid #94A3B8;
+    border-radius: 14px;
+    overflow-y: auto;
+    position: absolute;
+    width: 410px;
+    background-color: #fff;
+  }
+  &__message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 48px;
+  }
+  &__search-input {
+    border: 0;
+    width: 100%;
+    flex: 1;
+    margin: -2px;
+    outline: none;
+    min-width: 30px;
+    min-height: 40px;
+  }
+  &__arrow {
+    position: absolute;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}

@@ -1,0 +1,48 @@
+.container {
+  position: relative;
+  max-width: 600px;
+}
+
+.inputWrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.inputWrapper input {
+  flex: 1
+}
+
+.selectedItemsList {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  list-style-type: none;
+  flex-wrap: wrap;
+}
+
+.selectedItem {
+  background-color: #e1e8ef;
+  border-radius: 5px;
+  padding: 4px;
+  width: auto;
+  flex-shrink: 0;
+  margin: 5px;
+}
+
+.selectedItem button {
+  width: 18px;
+  height: 18px;
+  margin-left: 8px;
+}
+
+.selectedItem+.selectedItem {
+  margin-left: 0;
+}
+
+.selected {
+  background-color: aquamarine;
+}
+
+.active {
+  border: 1px solid blue;
+}
