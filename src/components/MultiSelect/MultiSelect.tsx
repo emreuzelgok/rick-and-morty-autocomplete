@@ -47,11 +47,11 @@ const MultiSelect = () => {
             signal: abortController.signal,
           }
         );
-        // setFocusedIndex(0);
+        setFocusedOption({ focusedIndex: 0, isSelected: false });
         setMessage('');
         setOptions(data.results);
       } catch (error) {
-        // setFocusedIndex(0);
+        setFocusedOption({ focusedIndex: 0, isSelected: false });
         setMessage(SEARCH_NOT_FOUND_MESSAGE);
         setOptions([]);
       } finally {
@@ -106,6 +106,7 @@ const MultiSelect = () => {
       let isSelected = prev.isSelected;
 
       if (newFocusedIndex < 0) {
+
         if (!selectedOptions.length) {
           newFocusedIndex = 0;
           isSelected = false;
