@@ -13,7 +13,7 @@ const SEARCH_MESSAGE = 'Please type something.';
 const SEARCH_NOT_FOUND_MESSAGE = 'No results found!';
 
 
-const PREVENT_KEYS = ['ArrowUp', 'ArrowDown', 'Enter'];
+const PREVENT_KEYS = ['ArrowUp', 'ArrowDown', 'Enter', 'Tab'];
 const FOCUS_NEXT_KEYS = ['ArrowDown'];
 const FOCUS_PREV_KEYS = ['ArrowUp'];
 
@@ -135,7 +135,6 @@ const MultiSelect = () => {
     }
 
     if (e.key === 'Tab') {
-      e.preventDefault()
       if (e.shiftKey) {
         selectPrevOption();
         return;
