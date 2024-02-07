@@ -10,6 +10,10 @@
   border-radius: 8px;
   align-items: center;
   color: #334155;
+  border: 1px solid transparent;
+  &--focused {
+    border-color: rgb(4, 61, 108);
+  }
   &:first-child {
     margin-left: 0;
   }

@@ -40,11 +40,11 @@ const Option: FC<OptionProps> = ({ selected, focused, name, episodes, onClickOpt
       <img className="option__image" src={image} alt="" />
       <div className="option__info">
         <div className="option__name">
-          {nameParts.map((item, index) =>{
+          {nameParts.map((item, index) => {
             if (item.toLowerCase() === query?.toLowerCase()) {
-              return <strong key={`tp-${index}`}>{item}</strong>
+              return <strong key={`tp-${index}`}>{item}</strong>;
             }
-            return <span key={`tp-${index}`}>{item}</span>
+            return <span key={`tp-${index}`}>{item}</span>;
           })}
         </div>
         <div className="option__episodes">{episodes} Episodes</div>

@@ -12,7 +12,6 @@ import { ApiResponse, Character } from '@/types';
 const SEARCH_MESSAGE = 'Please type something.';
 const SEARCH_NOT_FOUND_MESSAGE = 'No results found!';
 
-
 const PREVENT_KEYS = ['ArrowUp', 'ArrowDown', 'Enter', 'Tab'];
 const FOCUS_NEXT_KEYS = ['ArrowDown'];
 const FOCUS_PREV_KEYS = ['ArrowUp'];
@@ -28,7 +27,7 @@ const MultiSelect = () => {
   
   const [showOptions, setShowOptions] = useState(false);
   const [message, setMessage] = useState(SEARCH_MESSAGE);
-  const [focusedIndex, setFocusedIndex] = useState(0);
+  const [focusedOption, setFocusedOption] = useState({ focusedIndex: 0, isSelected: false });
   
   const [selectedOptions, setSelectedOptions] = useState<Character[]>([]);
 
@@ -48,11 +47,11 @@ const MultiSelect = () => {
             signal: abortController.signal,
           }
         );
-        setFocusedIndex(0);
+        // setFocusedIndex(0);
         setMessage('');
         setOptions(data.results);
       } catch (error) {
-        setFocusedIndex(0);
+        // setFocusedIndex(0);
         setMessage(SEARCH_NOT_FOUND_MESSAGE);
         setOptions([]);
       } finally {
@@ -79,18 +78,18 @@ const MultiSelect = () => {
 
   const onFocusInputText = useCallback(() => {
     setShowOptions(true);
-    setFocusedIndex(0);
+    setFocusedOption({ isSelected: false, focusedIndex: 0 });
   }, []);
 
   const focusTextInput = useCallback(() => {
     inputRef.current?.focus();
   }, []);
 
-  const onClickOption = useCallback((item: Character, index?: number) => {
+  const toggleOption = useCallback((item: Character, index?: number) => {
     inputRef.current?.focus();
 
     if (index) {
-      setFocusedIndex(index);
+      setFocusedOption({ focusedIndex: index, isSelected: false });
     }
 
     if (selectedOptions.find((selected) => selected.id === item.id)) {
@@ -102,24 +101,53 @@ const MultiSelect = () => {
   }, [selectedOptions]);
 
   const selectPrevOption = useCallback(() => {
-    setFocusedIndex(prev => {
-      if (prev !== 0) {
-        return prev - 1;
+    setFocusedOption(prev => {
+      let newFocusedIndex = prev.focusedIndex - 1;
+      let isSelected = prev.isSelected;
+
+      if (newFocusedIndex < 0) {
+        if (!selectedOptions.length) {
+          newFocusedIndex = 0;
+          isSelected = false;
+        } 
+        
+        if (!isSelected) {
+          isSelected = true;
+          newFocusedIndex = selectedOptions.length - 1;
+        } else if (isSelected && !selectedOptions[focusedOption.focusedIndex]) {
+          isSelected = false;
+          newFocusedIndex = options.length - 1;
+        }
       }
-      return 0;
+
+      return {
+        focusedIndex: newFocusedIndex,
+        isSelected,
+      }
     });
-  }, []);
+  }, [selectedOptions, focusedOption.focusedIndex, options])
 
   const selectNextOption = useCallback(() => {
-    setFocusedIndex(prev => {
-      if (prev > options.length - 2) {
-        return 0;
-      }
-      return prev + 1
-    });
-  }, [options]);
+    setFocusedOption(prev => {
+      let newFocusedIndex = prev.focusedIndex + 1;
+      let isSelected= prev.isSelected;
 
-  
+      if (isSelected && newFocusedIndex > selectedOptions.length - 1) {
+        isSelected = false;
+        newFocusedIndex = 0;
+      }
+
+      if (!isSelected && newFocusedIndex > options.length - 1) {
+        isSelected = true;
+        newFocusedIndex = 0;
+      }
+
+      return {
+        focusedIndex: newFocusedIndex,
+        isSelected,
+      }
+    })
+  }, [options, selectedOptions.length]);
 
   const onKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
     if (PREVENT_KEYS.includes(e.key)) {
@@ -145,10 +173,16 @@ const MultiSelect = () => {
     // Toggle element
 
     if (e.key === 'Enter') {
-      const currentCharacter = options[focusedIndex];
-      if (currentCharacter) {
-        onClickOption(currentCharacter);
+      // Toggle element from options
+      if (!focusedOption.isSelected) {
+        const currentCharacter = options[focusedOption.focusedIndex];
+        if (currentCharacter) {
+          toggleOption(currentCharacter);
+        }
+        return;
       }
+      // Remove selected option from input
+      toggleOption(selectedOptions[focusedOption.focusedIndex]);
     }
 
     if (e.key === 'Backspace') {
@@ -160,16 +194,17 @@ const MultiSelect = () => {
     if (e.key === 'Escape') {
       setShowOptions(false);
     }
-  }, [focusedIndex, onClickOption, options, query, selectNextOption, selectPrevOption]);
+  }, [focusedOption, toggleOption, options, query, selectNextOption, selectPrevOption, selectedOptions]);
 
   return (
     <div className="multi-select" ref={wrapperRef}>
       <div className="multi-select__values" onClick={focusTextInput}>
-        {selectedOptions.map(((selectedOption) => (
+        {selectedOptions.map(((selectedOption, index) => (
           <SelectedOption 
             name={selectedOption.name}
-            onClickRemoveButton={() => onClickOption(selectedOption)}
+            onClickRemoveButton={() => toggleOption(selectedOption)}
             key={selectedOption?.id}
+            focused={focusedOption.focusedIndex === index && focusedOption.isSelected}
           />
         )))}
         <div className="multi-select__arrow">
@@ -194,12 +229,12 @@ const MultiSelect = () => {
                 key={index}
                 index={index}
                 selected={!!selectedOptions.find(item => item.id === option.id)}
-                focused={index === focusedIndex}
+                focused={index === focusedOption.focusedIndex && !focusedOption.isSelected}
                 name={option.name}
                 image={option.image}
                 episodes={option?.episode.length}
                 query={query}
-                onClickOption={() => onClickOption(option, index)}
+                onClickOption={() => toggleOption(option, index)}
               />
             ))}
           </div>
