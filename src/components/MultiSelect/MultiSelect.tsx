@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import SelectedOption from '../SelectedOption';
 import Option from '../Option';
 import { FaCaretDown } from 'react-icons/fa';
@@ -12,6 +12,10 @@ import { ApiResponse, Character } from '@/types';
 const SEARCH_MESSAGE = 'Please type something.';
 const SEARCH_NOT_FOUND_MESSAGE = 'No results found!';
 
+
+const PREVENT_KEYS = ['ArrowUp', 'ArrowDown', 'Enter'];
+const FOCUS_NEXT_KEYS = ['ArrowDown'];
+const FOCUS_PREV_KEYS = ['ArrowUp'];
 
 const MultiSelect = () => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -34,13 +38,16 @@ const MultiSelect = () => {
 
   useEffect(() => {
     let abortController: AbortController;
-    const search = async () => {
+    const search = async (query: string) => {
       abortController = new AbortController();
       try {
         setIsLoading(true);
-        const { data } = await axios.get<ApiResponse>(`https://rickandmortyapi.com/api/character/?name=${query}`, {
-          signal: abortController.signal,
-        });
+        const { data } = await axios.get<ApiResponse>(
+          `https://rickandmortyapi.com/api/character/?name=${query}`, 
+          {
+            signal: abortController.signal,
+          }
+        );
         setFocusedIndex(0);
         setMessage('');
         setOptions(data.results);
@@ -52,8 +59,10 @@ const MultiSelect = () => {
         setIsLoading(false);
       }  
     }
-    
-    search();
+
+    if (query !== '') {
+      search(query);
+    }
   
     return () => {
       if (abortController) {
@@ -62,22 +71,22 @@ const MultiSelect = () => {
     }
   }, [query]);
 
-  const onChangeInputText = async (e: ChangeEvent<HTMLInputElement>) => {
+  const onChangeInputText = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setQuery(value);
     setShowOptions(true);
-  }
+  }, []);
 
-  const onFocusInputText = () => {
+  const onFocusInputText = useCallback(() => {
     setShowOptions(true);
     setFocusedIndex(0);
-  }
+  }, []);
 
-  const focusTextInput = () => {
+  const focusTextInput = useCallback(() => {
     inputRef.current?.focus();
-  }
+  }, []);
 
-  const onClickOption = (item: Character, index?: number) => {
+  const onClickOption = useCallback((item: Character, index?: number) => {
     inputRef.current?.focus();
 
     if (index) {
@@ -90,31 +99,29 @@ const MultiSelect = () => {
     }
     
     setSelectedOptions(prev => ([...prev, item]));
-  }
+  }, [selectedOptions]);
 
-  const selectPrevOption = () => {
+  const selectPrevOption = useCallback(() => {
     setFocusedIndex(prev => {
       if (prev !== 0) {
         return prev - 1;
       }
       return 0;
     });
-  }
+  }, []);
 
-  const selectNextOption = () => {
+  const selectNextOption = useCallback(() => {
     setFocusedIndex(prev => {
       if (prev > options.length - 2) {
         return 0;
       }
       return prev + 1
     });
-  }
+  }, [options]);
 
-  const PREVENT_KEYS = ['ArrowUp', 'ArrowDown', 'Enter'];
-  const FOCUS_NEXT_KEYS = ['ArrowDown'];
-  const FOCUS_PREV_KEYS = ['ArrowUp'];
+  
 
-  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
     if (PREVENT_KEYS.includes(e.key)) {
       e.preventDefault();
     }
@@ -141,7 +148,6 @@ const MultiSelect = () => {
     if (e.key === 'Enter') {
       const currentCharacter = options[focusedIndex];
       if (currentCharacter) {
-        e.preventDefault();
         onClickOption(currentCharacter);
       }
     }
@@ -155,12 +161,12 @@ const MultiSelect = () => {
     if (e.key === 'Escape') {
       setShowOptions(false);
     }
-  }
+  }, [focusedIndex, onClickOption, options, query, selectNextOption, selectPrevOption]);
 
   return (
     <div className="multi-select" ref={wrapperRef}>
       <div className="multi-select__values" onClick={focusTextInput}>
-        {selectedOptions.map(((selectedOption: any) => (
+        {selectedOptions.map(((selectedOption) => (
           <SelectedOption 
             name={selectedOption.name}
             onClickRemoveButton={() => onClickOption(selectedOption)}
@@ -184,7 +190,7 @@ const MultiSelect = () => {
           <div className="multi-select__options">
             {!isLoading && message && <div className="multi-select__message">{message}</div>}
             {isLoading && <Loading/>}
-            {!isLoading && options.map((option: any, index) => (
+            {!isLoading && options.map((option, index) => (
               <Option
                 key={index}
                 index={index}
