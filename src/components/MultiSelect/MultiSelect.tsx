@@ -106,24 +106,19 @@ const MultiSelect = () => {
       let isSelected = prev.isSelected;
 
       if (newFocusedIndex < 0) {
-        const hasSelectedOption = !!selectedOptions[newFocusedIndex];
-        if (!selectedOptions.length) {
-          newFocusedIndex = 0;
-          isSelected = false;
-        } 
-        
-        if (!isSelected) {
+        if (!isSelected && !!selectedOptions.length) {
           isSelected = true;
           newFocusedIndex = selectedOptions.length - 1;
-        } else if (isSelected && !hasSelectedOption) {
+        } else if (isSelected && !!options.length){
           isSelected = false;
           newFocusedIndex = options.length - 1;
-        }
-        
-        if (!!options.length && newFocusedIndex < 0) {
+        } else if (!isSelected && !!options.length) {
           newFocusedIndex = options.length - 1;
-          isSelected = false;
         }
+      }
+
+      if (newFocusedIndex < 0) {
+        newFocusedIndex = 0;
       }
 
       return {
@@ -137,21 +132,15 @@ const MultiSelect = () => {
     setFocusedOption(prev => {
       let newFocusedIndex = prev.focusedIndex + 1;
       let isSelected= prev.isSelected;
-      const hasSelectedOption = !!selectedOptions[newFocusedIndex];
-      if (isSelected && newFocusedIndex > selectedOptions.length - 1) {
-        isSelected = false;
-        newFocusedIndex = 0;
-      }
 
       if (!isSelected && newFocusedIndex > options.length - 1) {
         isSelected = true;
         newFocusedIndex = 0;
-      }
-
-      if (!hasSelectedOption) {
+      } else if (isSelected && newFocusedIndex > selectedOptions.length - 1) {
         isSelected = false;
+        newFocusedIndex = 0;
       }
-
+      
       return {
         focusedIndex: newFocusedIndex,
         isSelected,
