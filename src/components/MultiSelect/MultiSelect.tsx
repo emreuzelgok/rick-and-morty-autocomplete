@@ -100,7 +100,6 @@ const MultiSelect = () => {
     setSelectedOptions(prev => ([...prev, item]));
   }, [selectedOptions]);
 
-  console.log(focusedOption);
   const selectPrevOption = useCallback(() => {
     setFocusedOption(prev => {
       let newFocusedIndex = prev.focusedIndex - 1;
