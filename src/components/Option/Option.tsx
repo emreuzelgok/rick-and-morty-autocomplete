@@ -36,7 +36,7 @@ const Option: FC<OptionProps> = ({ selected, focused, name, episodes, onClickOpt
 
   return (
     <div className={classNames} onClick={onClickOption} ref={containerRef}>
-      <input className="option__checkbox" tabIndex={-1} type="checkbox" checked={selected} />
+      <input className="option__checkbox" readOnly tabIndex={-1} type="checkbox" checked={selected} />
       <img className="option__image" src={image} alt="" />
       <div className="option__info">
         <div className="option__name">

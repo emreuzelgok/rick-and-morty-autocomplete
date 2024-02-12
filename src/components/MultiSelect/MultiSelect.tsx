@@ -100,13 +100,14 @@ const MultiSelect = () => {
     setSelectedOptions(prev => ([...prev, item]));
   }, [selectedOptions]);
 
+  console.log(focusedOption);
   const selectPrevOption = useCallback(() => {
     setFocusedOption(prev => {
       let newFocusedIndex = prev.focusedIndex - 1;
       let isSelected = prev.isSelected;
 
       if (newFocusedIndex < 0) {
-
+        const hasSelectedOption = !!selectedOptions[newFocusedIndex];
         if (!selectedOptions.length) {
           newFocusedIndex = 0;
           isSelected = false;
@@ -115,9 +116,14 @@ const MultiSelect = () => {
         if (!isSelected) {
           isSelected = true;
           newFocusedIndex = selectedOptions.length - 1;
-        } else if (isSelected && !selectedOptions[focusedOption.focusedIndex]) {
+        } else if (isSelected && !hasSelectedOption) {
           isSelected = false;
           newFocusedIndex = options.length - 1;
+        }
+        
+        if (!!options.length && newFocusedIndex < 0) {
+          newFocusedIndex = options.length - 1;
+          isSelected = false;
         }
       }
 
@@ -126,13 +132,13 @@ const MultiSelect = () => {
         isSelected,
       }
     });
-  }, [selectedOptions, focusedOption.focusedIndex, options])
+  }, [selectedOptions, options])
 
   const selectNextOption = useCallback(() => {
     setFocusedOption(prev => {
       let newFocusedIndex = prev.focusedIndex + 1;
       let isSelected= prev.isSelected;
-
+      const hasSelectedOption = !!selectedOptions[newFocusedIndex];
       if (isSelected && newFocusedIndex > selectedOptions.length - 1) {
         isSelected = false;
         newFocusedIndex = 0;
@@ -143,12 +149,16 @@ const MultiSelect = () => {
         newFocusedIndex = 0;
       }
 
+      if (!hasSelectedOption) {
+        isSelected = false;
+      }
+
       return {
         focusedIndex: newFocusedIndex,
         isSelected,
       }
     })
-  }, [options, selectedOptions.length]);
+  }, [options, selectedOptions]);
 
   const onKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
     if (PREVENT_KEYS.includes(e.key)) {
@@ -175,21 +185,21 @@ const MultiSelect = () => {
 
     if (e.key === 'Enter') {
       // Toggle element from options
+      let currentCharacter: Character; 
+
       if (!focusedOption.isSelected) {
-        const currentCharacter = options[focusedOption.focusedIndex];
-        if (currentCharacter) {
-          toggleOption(currentCharacter);
-        }
-        return;
+        currentCharacter = options[focusedOption.focusedIndex];
+      } else {
+        currentCharacter = selectedOptions[focusedOption.focusedIndex];
       }
-      // Remove selected option from input
-      toggleOption(selectedOptions[focusedOption.focusedIndex]);
+      if (currentCharacter) {
+        toggleOption(currentCharacter);
+      }
+      return;
     }
 
-    if (e.key === 'Backspace') {
-      if (query === '') {
-        setSelectedOptions(prev => ([ ...prev.slice(0, prev.length - 1) ]))  
-      }
+    if (e.key === 'Backspace' && query === '') {
+      setSelectedOptions(prev => ([ ...prev.slice(0, prev.length - 1) ]))  
     }
 
     if (e.key === 'Escape') {
